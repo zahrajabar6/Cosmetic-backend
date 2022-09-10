@@ -1,7 +1,14 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
+class User(models.Model):
+    parent = models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True)
+    name = models.CharField(max_length=40)
+
+    def __str__(self):
+        if self.parent:
+            return f'-{self.parent}-{self.name}'
+        return f'{self.name}'
+
 class OrderStatusChoices(models.TextChoices):
     NEW ='NEW','New'
     PROCESSING = 'PROCESSING','Peoceeing'
@@ -14,16 +21,16 @@ class Product(models.Model):
     description = models.TextField('description', null=True, blank=True)
     ingredient = models.TextField('ingredient', null=True, blank=True)
     price = models.DecimalField('price', max_digits=10, decimal_places=2)
-    discounted_price = models.DecimalField('discounted price', max_digits=10, decimal_places=2)
+    discounted_price = models.DecimalField('discounted price', max_digits=10, decimal_places=2,
+                                           null=True,blank=True,default= 0)
     category = models.ForeignKey('Category', verbose_name='category', related_name='products',
-                                 null=True,
-                                 blank=True,
+                                 null=True,blank=True,
                                  on_delete=models.SET_NULL)
     brand = models.ForeignKey('Brand',on_delete=models.SET_NULL,null=True,blank=True)
     is_active = models.BooleanField('is active')
 
     def __str__(self):
-        return self.name
+        return f'{self.name}-{self.category}'
 class Category(models.Model):
     parent = models.ForeignKey('self',verbose_name='parent',related_name='children',null=True,blank=True,
                                on_delete=models.CASCADE)
@@ -33,7 +40,7 @@ class Category(models.Model):
 
     def __str__(self):
         if self.parent:
-            return f'-   {self.name}'
+            return f'{self.parent}-{self.name}'
         return f'{self.name}'
 
     class Meta:
@@ -66,10 +73,8 @@ class City(models.Model):
 
 
 class Address(models.Model):
-    user = models.ForeignKey(User, verbose_name='user', related_name='items', on_delete=models.CASCADE)
-    work_address = models.BooleanField('work address', null=True, blank=True)
-    address1 = models.CharField('address1', max_length=255)
-    address2 = models.CharField('address2', null=True, blank=True, max_length=255)
+    user = models.ForeignKey(User, verbose_name='user', related_name='address', on_delete=models.CASCADE)
+    address = models.CharField('address', max_length=255)
     city = models.ForeignKey('City', related_name='addresses', on_delete=models.CASCADE,null=True)
     phone = models.CharField('phone', max_length=255)
 
@@ -77,21 +82,21 @@ class Address(models.Model):
         verbose_name = 'Address'
         verbose_name_plural = 'Addresses'
     def __str__(self):
-        return f'{self.user.first_name} - {self.address1} - {self.address2} - {self.phone}'
+        return f' {self.user}-{self.address} - {self.phone}'
 
 class Order(models.Model):
-    user = models.ForeignKey(User, verbose_name='user', related_name='orders', null=True, blank=True,
+    user = models.ForeignKey(User, verbose_name='user', related_name='order', null=True, blank=True,
                              on_delete=models.CASCADE)
     address = models.ForeignKey('Address', verbose_name='address', null=True, blank=True,
                                 on_delete=models.CASCADE)
     total = models.DecimalField('total', blank=True, null=True, max_digits=1000, decimal_places=0)
-    status = models.ForeignKey('OrderStatus', verbose_name='status', related_name='orders',
-                               on_delete=models.CASCADE)
+    status = models.CharField('status', max_length=255, choices=OrderStatusChoices.choices)
     ordered = models.BooleanField('ordered')
     items = models.ManyToManyField('Item', verbose_name='items', related_name='order')
 
     def __str__(self):
-        return f'{self.user.first_name} + {self.total}'
+        return f'{self.total}'
+
 
 class Item(models.Model):
     user = models.ForeignKey(User, verbose_name='user', related_name='items', on_delete=models.CASCADE)
@@ -101,19 +106,4 @@ class Item(models.Model):
     ordered = models.BooleanField('ordered', default=False)
 
     def __str__(self):
-        return f''
-
-class OrderStatus(models.Model):
-    user = models.ForeignKey(User, verbose_name='user', related_name='orders', null=True, blank=True,
-                             on_delete=models.CASCADE)
-    title = models.CharField('title', max_length=255, choices=OrderStatusChoices.choices)
-    is_default = models.BooleanField('is default')
-
-    class Meta:
-        verbose_name = 'OrderStatus'
-        verbose_name_plural = 'order statuses'
-    def __str__(self):
-        return self.title
-
-# class User(AbstractUser):
-#     pass
+        return f'{self.user}-{self.product}-{self.item_qty}'
