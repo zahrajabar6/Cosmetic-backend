@@ -1,13 +1,8 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-class User(models.Model):
-    parent = models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True)
-    name = models.CharField(max_length=40)
+User = get_user_model()
 
-    def __str__(self):
-        if self.parent:
-            return f'-{self.parent}-{self.name}'
-        return f'{self.name}'
 
 class OrderStatusChoices(models.TextChoices):
     NEW ='NEW','New'
