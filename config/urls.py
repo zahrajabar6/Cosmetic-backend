@@ -13,9 +13,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.urls import include, path
 from django.contrib import admin
 from django.urls import path
+from ninja import NinjaAPI
+from Account.views import account_controller
+from Cosmetic.views import Product_Router,Address_Router,Order_Router
+
+api = NinjaAPI()
+
+api.add_router('auth', account_controller)
+api.add_router('Product',Product_Router)
+api.add_router('Address',Address_Router)
+api.add_router('Order',Order_Router)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/", api.urls),
 ]
+urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

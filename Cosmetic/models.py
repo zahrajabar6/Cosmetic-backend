@@ -21,8 +21,10 @@ class Product(models.Model):
     category = models.ForeignKey('Category', verbose_name='category', related_name='products',
                                  null=True,blank=True,
                                  on_delete=models.SET_NULL)
-    brand = models.ForeignKey('Brand',on_delete=models.SET_NULL,null=True,blank=True)
+    brand = models.ForeignKey('Brand',on_delete=models.SET_NULL,
+                                 null=True,blank=True)
     is_active = models.BooleanField('is active')
+    rate = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.name}-{self.category}'
@@ -68,7 +70,7 @@ class City(models.Model):
 
 
 class Address(models.Model):
-    user = models.ForeignKey(User, verbose_name='user', related_name='address', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, verbose_name='user', related_name='addresses', on_delete=models.CASCADE)
     address = models.CharField('address', max_length=255)
     city = models.ForeignKey('City', related_name='addresses', on_delete=models.CASCADE,null=True)
     phone = models.CharField('phone', max_length=255)
@@ -80,14 +82,14 @@ class Address(models.Model):
         return f' {self.user}-{self.address} - {self.phone}'
 
 class Order(models.Model):
-    user = models.ForeignKey(User, verbose_name='user', related_name='order', null=True, blank=True,
+    user = models.ForeignKey(User, verbose_name='user', related_name='orders', null=True, blank=True,
                              on_delete=models.CASCADE)
-    address = models.ForeignKey('Address', verbose_name='address', null=True, blank=True,
+    address = models.ForeignKey('Address', verbose_name='address',related_name='orders', null=True, blank=True,
                                 on_delete=models.CASCADE)
     total = models.DecimalField('total', blank=True, null=True, max_digits=1000, decimal_places=0)
     status = models.CharField('status', max_length=255, choices=OrderStatusChoices.choices)
     ordered = models.BooleanField('ordered')
-    items = models.ManyToManyField('Item', verbose_name='items', related_name='order')
+    items = models.ManyToManyField('Item', verbose_name='items', related_name='orders')
 
     def __str__(self):
         return f'{self.total}'

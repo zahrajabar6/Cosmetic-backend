@@ -1,5 +1,9 @@
 from decimal import Decimal
+from Cosmetic.models import Product
 from ninja import Schema
+
+class MessageOut(Schema):
+    detail: str
 
 
 class UserIn(Schema):
@@ -34,6 +38,7 @@ class ProductOut(Schema):
     ingredient: str = None
     price: Decimal
     discounted_price: Decimal
+    # brand: 'BrandOut'=None
     is_active: bool
 
 
@@ -57,6 +62,9 @@ CategoryOut.update_forward_refs()
 class BrandIn(Schema):
     name: str
 
+# class BrandOut(Schema):
+#     brand_id: int 
+#     name: str
 
 class ColorIn(Schema):
     product_name: str
@@ -71,6 +79,9 @@ class ColorOut(Schema):
 
 class CityIn(Schema):
     name: str
+
+class CityOut(CityIn):
+    pass
 
 
 class AddressIn(Schema):
@@ -96,7 +107,7 @@ class OrderIn(Schema):
 
 
 class OrderOut(Schema):
-    user: UserOut
+    # user: UserOut
     address: AddressOut
     total: Decimal
     item: str
@@ -108,9 +119,13 @@ class ItemIn(Schema):
     item_qty: int
     ordered: bool
 
+class CreatItem(Schema):
+    product_id: int
+    item_qty: int
 
 class ItemOut(Schema):
     id: int
-    user: UserOut
+    # user: UserOut
     product: ProductOut
     item_qty: int
+    ordered: bool 
