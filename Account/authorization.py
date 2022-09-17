@@ -4,23 +4,23 @@ from django.contrib.auth import get_user_model
 from jose import jwt, JWTError
 from ninja.security import HttpBearer
 
-User = get_user_model()
-
 TIME_DELTA = timedelta(days=120)
 
+User = get_user_model()
 
 class GlobalAuth(HttpBearer):
-    def authenticate(self, request, token):
+     def authenticate(self, request, token):
         try:
-            user_pk = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms=['HS256'])
+            user_email = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms='HS256')
         except JWTError:
             return {'token': 'unauthorized'}
-        if user_pk:
-            return {'pk': str(user_pk['pk'])}
+
+        if user_email:
+            return {'email': str(user_email['email'])}
 
 
 def get_tokens_for_user(user):
-    token = jwt.encode({'pk': str(user.pk)}, key=settings.SECRET_KEY, algorithm='HS256')
+    token = jwt.encode({'email': str(user.email)}, key=settings.SECRET_KEY, algorithm='HS256')
     return {
-        'access': str(token),
+        'access': str(token)
     }

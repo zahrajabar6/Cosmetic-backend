@@ -24,7 +24,6 @@ class Product(models.Model):
     brand = models.ForeignKey('Brand',on_delete=models.SET_NULL,
                                  null=True,blank=True)
     is_active = models.BooleanField('is active')
-    rate = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.name}-{self.category}'
@@ -104,3 +103,12 @@ class Item(models.Model):
 
     def __str__(self):
         return f'{self.user}-{self.product}-{self.item_qty}'
+
+class Review(models.Model):
+    user = models.ForeignKey(User,verbose_name='user',related_name='reviws',on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,verbose_name='product',
+                                on_delete=models.CASCADE)
+    rate = models.IntegerField(default= 0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f'{self.user}-{self.product}-{self.rate}'

@@ -8,13 +8,12 @@ class CustomUserManager(UserManager):
         case_insensitive_username_field = '{}__iexact'.format(self.model.USERNAME_FIELD)
         return self.get(**{case_insensitive_username_field: username})
 
-
     def create_user(self, first_name, last_name, email, password=None):
         if not email:
-         raise ValueError('user must have email')
+            raise ValueError('user must have email')
 
         user = self.model(
-             email=self.normalize_email(email),
+            email=self.normalize_email(email),
         )
         user.set_password(password)
         user.first_name = first_name
@@ -22,7 +21,6 @@ class CustomUserManager(UserManager):
         user.is_staff = True
         user.save(using=self._db)
         return user
-
 
     def create_superuser(self, email, password):
         if not email:
@@ -43,9 +41,13 @@ class User(AbstractBaseUser):
     email = models.EmailField(_('email address'), unique=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
+    first_name = models.CharField(max_length=20, null=True, blank=True)
+    last_name = models.CharField(max_length=20, null=True, blank=True)
+    # image = models.ImageField(height_field=)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
+    last_login = models.DateTimeField(editable=False, auto_now=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = CustomUserManager()

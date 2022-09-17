@@ -10,22 +10,23 @@ Class-based views
     1. Add an import:  from other_app.views import Home
     2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
 Including another URLconf
-    1. Import the include() function: from django.urls import include, path
+    1. Import to include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import include, path
 from django.contrib import admin
+from django.urls import include
 from django.urls import path
 from ninja import NinjaAPI
-from Account.views import account_controller
-from Cosmetic.views import Product_Router,Address_Router,Order_Router
+from Account.authorization import GlobalAuth
 
+from Account.views import account_controller
+from Cosmetic.views import Product_Router, Address_Router, Order_Router
 api = NinjaAPI()
 
 api.add_router('auth', account_controller)
-api.add_router('Product',Product_Router)
-api.add_router('Address',Address_Router)
-api.add_router('Order',Order_Router)
+api.add_router('Product', Product_Router)
+api.add_router('Address', Address_Router)
+api.add_router('Order', Order_Router, auth=GlobalAuth)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

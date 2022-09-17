@@ -4,6 +4,7 @@ from ninja import Router
 from django.contrib.auth import get_user_model, authenticate
 from Account.authorization import *
 from Account.utils.decorators import *
+
 User = get_user_model()
 
 account_controller = Router(tags=['auth'])
@@ -20,12 +21,8 @@ def signup(request, account_in: AccountCreate):
     try:
         User.objects.get(email=account_in.email)
     except User.DoesNotExist:
-        new_user = User.objects.create_user(
-            first_name=account_in.first_name,
-            last_name=account_in.last_name,
-            email=account_in.email,
-            password=account_in.password1
-        )
+        new_user = User.objects.create_user(first_name=account_in.first_name, last_name=account_in.last_name,
+                                            email=account_in.email, password=account_in.password1)
 
         token = get_tokens_for_user(new_user)
 
@@ -36,13 +33,13 @@ def signup(request, account_in: AccountCreate):
 
     return 400, {'detail': 'User already registered!'}
 
+
 @account_controller.post('signin', response={
     200: AuthOut,
     404: MessageOut,
 })
 def signin(request, signin_in: SigninSchema):
     user = authenticate(email=signin_in.email, password=signin_in.password)
-
     if not user:
         return 404, {'detail': 'User does not exist'}
 
@@ -52,6 +49,7 @@ def signin(request, signin_in: SigninSchema):
         'token': token,
         'account': user
     }
+
 
 @account_controller.get('', auth=GlobalAuth(), response={
     200: AccountOut,

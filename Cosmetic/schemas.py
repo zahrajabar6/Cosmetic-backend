@@ -1,23 +1,26 @@
 from decimal import Decimal
 from Cosmetic.models import Product
 from ninja import Schema
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 
 class MessageOut(Schema):
     detail: str
 
 
 class UserIn(Schema):
-    username: str
+    email: str
     first_name: str
     last_name: str
-    email: str
-    phone: str
+    phone: str =None
     password: int
 
 
 class UserOut(Schema):
-    username: str
-    phone: str
+    email: str
+    phone: str =None
 
 
 class ProductIn(Schema):
@@ -107,7 +110,7 @@ class OrderIn(Schema):
 
 
 class OrderOut(Schema):
-    # user: UserOut
+    user: UserOut
     address: AddressOut
     total: Decimal
     item: str
@@ -125,7 +128,16 @@ class CreatItem(Schema):
 
 class ItemOut(Schema):
     id: int
-    # user: UserOut
+    user: UserOut
     product: ProductOut
     item_qty: int
     ordered: bool 
+
+class RateIn(Schema):
+    product_id : int 
+    rate : int 
+
+class RateOut(Schema):
+    user : UserOut
+    product:ProductOut
+    rate: int

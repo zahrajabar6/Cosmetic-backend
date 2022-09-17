@@ -1,3 +1,4 @@
+from tkinter import N
 from ninja import Schema
 from typing import Optional
 from pydantic import EmailStr, Field
@@ -5,14 +6,14 @@ from pydantic import EmailStr, Field
 
 class AccountCreate(Schema):
     first_name: str
-    last_name: str
+    last_name: str 
     email: EmailStr
     password1: str = Field(min_length=8)
     password2: str
 
 class AccountOut(Schema):
-    first_name: str
-    last_name: str
+    first_name: str = None
+    last_name: str  = None
     email: EmailStr
     phone_number: Optional[str]
     address1: str = None
