@@ -79,15 +79,15 @@ def product(request, id:int):
 
 
 
-@Product_Router.post("/Reviw", response=RateOut ,auth=GlobalAuth)
-@check_pk
+@Product_Router.post("/Reviw", response={
+    200:RateOut,
+    404: MessageOut} ,auth=GlobalAuth)
+
 def Reviw(request,rate_in:RateIn):
-    rate = Review.objects.create(**rate_in.dict() , user=User.objects.get(id=request.auth['pk']))
-    return rate
+     return Review.objects.create(**rate_in.dict() , user=User.objects.get(id=request.auth['pk']))
 
 
 @Order_Router.get("/cart",response=List[ItemOut])
-@check_pk
 def view_cart(request):
     cart_item = Item.objects.filter(user=User.objects.get(id=request.auth['pk']),ordered=False)
     return cart_item
