@@ -52,7 +52,7 @@ class Color(models.Model):
         return f'{self.productName} - {self.color}'
 
 class Brand(models.Model):
-    Brand_Name = models.CharField(verbose_name='Brand_Name',max_length=200)
+    brand_name = models.CharField(verbose_name='Brand_Name',max_length=200)
 
     def __str__(self):
         return self.Brand_Name

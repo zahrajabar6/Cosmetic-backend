@@ -10,13 +10,15 @@ class AccountCreate(Schema):
     email: EmailStr
     password1: str = Field(min_length=8)
     password2: str
+    phone_number : str =None
+    address : str = None
 
 class AccountOut(Schema):
     first_name: str = None
     last_name: str  = None
     email: EmailStr
     phone_number: Optional[str]
-    address1: str = None
+    address: str = None
 
 class SigninSchema(Schema):
     email: EmailStr
@@ -26,7 +28,7 @@ class AccountUpdate(Schema):
     first_name: str
     last_name: str
     phone_number: Optional[str]
-    address1: str
+    address: str
 
 class ChangePasswordSchema(Schema):
     old_password: str

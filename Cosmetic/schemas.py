@@ -14,13 +14,15 @@ class UserIn(Schema):
     email: str
     first_name: str
     last_name: str
-    phone: str =None
+    phone_number: str =None
     password: int
 
 
 class UserOut(Schema):
+    first_name: str =None
+    last_name: str =None
     email: str
-    phone: str =None
+    phone_number: str =None
 
 
 class ProductIn(Schema):
@@ -33,6 +35,10 @@ class ProductIn(Schema):
     brand: str
     is_active: bool
 
+class BrandOut(Schema):
+    id: int
+    brand_name: str
+
 
 class ProductOut(Schema):
     id: int
@@ -41,7 +47,7 @@ class ProductOut(Schema):
     ingredient: str = None
     price: Decimal
     discounted_price: Decimal
-    # brand: 'BrandOut'=None
+    brand: BrandOut
     is_active: bool
 
 
@@ -65,9 +71,7 @@ CategoryOut.update_forward_refs()
 class BrandIn(Schema):
     name: str
 
-# class BrandOut(Schema):
-#     brand_id: int 
-#     name: str
+
 
 class ColorIn(Schema):
     product_name: str

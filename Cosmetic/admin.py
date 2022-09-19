@@ -1,5 +1,6 @@
 from django.contrib import admin
 from Cosmetic.models import *
+from  Account.models import *
 
 admin.site.register(Product)
 admin.site.register(Category)
@@ -10,3 +11,4 @@ admin.site.register(Address)
 admin.site.register(Order)
 admin.site.register(Item)
 admin.site.register(Review)
+admin.site.register(User)
