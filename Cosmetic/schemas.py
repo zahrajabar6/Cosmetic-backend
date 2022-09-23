@@ -1,7 +1,8 @@
 from decimal import Decimal
-from Cosmetic.models import Product
 from ninja import Schema
 from django.contrib.auth import get_user_model
+
+from Account.schemas import AccountOut
 
 User = get_user_model()
 
@@ -10,52 +11,16 @@ class MessageOut(Schema):
     detail: str
 
 
-class UserIn(Schema):
-    email: str
-    first_name: str
-    last_name: str
-    phone_number: str =None
-    password: int
-
-
-class UserOut(Schema):
-    first_name: str =None
-    last_name: str =None
-    email: str
-    phone_number: str =None
-
-
-class ProductIn(Schema):
-    name: str
-    description: str = None
-    ingredient: str = None
-    price: Decimal
-    discounted_price: Decimal
-    category: str
-    brand: str
-    is_active: bool
-
-class BrandOut(Schema):
-    id: int
-    brand_name: str
-
-
-class ProductOut(Schema):
-    id: int
-    name: str
-    description: str = None
-    ingredient: str = None
-    price: Decimal
-    discounted_price: Decimal
-    brand: BrandOut
-    is_active: bool
-
-
 class CategoryIn(Schema):
     parent_id: int
     name: str
     description: str = None
     is_active: bool
+
+
+class BrandOut(Schema):
+    id: int
+    brand_name: str
 
 
 class CategoryOut(Schema):
@@ -68,45 +33,35 @@ class CategoryOut(Schema):
 CategoryOut.update_forward_refs()
 
 
-class BrandIn(Schema):
+class ProductIn(Schema):
     name: str
-
-
-
-class ColorIn(Schema):
-    product_name: str
+    description: str = None
+    ingredient: str = None
+    price: Decimal
+    discounted_price: Decimal
     color: str
-    image_url: str
+    imageUrl: str
+    category_id: int
+    brand_id: int
+    is_active: bool
 
 
-class ColorOut(Schema):
-    color: str
-    image_url: str
-
-
-class CityIn(Schema):
+class ProductOut(ProductIn):
+    id: int
     name: str
-
-class CityOut(CityIn):
-    pass
-
-
-class AddressIn(Schema):
-    user_id: int
-    address: str
-    city: CityIn
-    phone: str
-
-
-class AddressOut(Schema):
-    user: UserOut
-    address: str
-    city: CityIn
+    description: str = None
+    ingredient: str = None
+    price: Decimal
+    discounted_price: Decimal
+    color: str
+    imageUrl: str
+    brand: BrandOut = None
+    category: CategoryOut = None
+    is_active: bool
 
 
 class OrderIn(Schema):
     user_id: int
-    address: str
     total: Decimal
     status: str
     ordered: bool
@@ -114,8 +69,7 @@ class OrderIn(Schema):
 
 
 class OrderOut(Schema):
-    user: UserOut
-    address: AddressOut
+    user: AccountOut
     total: Decimal
     item: str
 
@@ -126,22 +80,26 @@ class ItemIn(Schema):
     item_qty: int
     ordered: bool
 
-class CreatItem(Schema):
+
+class CreateItem(Schema):
     product_id: int
     item_qty: int
 
+
 class ItemOut(Schema):
     id: int
-    user: UserOut
+    user: AccountOut
     product: ProductOut
     item_qty: int
-    ordered: bool 
+    ordered: bool
+
 
 class RateIn(Schema):
-    product_id : int 
-    rate : int 
+    product_id: int
+    rate: int
+
 
 class RateOut(Schema):
-    user : UserOut
-    product:ProductOut
+    user: AccountOut
+    product_id: int
     rate: int

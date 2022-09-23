@@ -18,14 +18,17 @@ from django.urls import include
 from django.urls import path
 from ninja import NinjaAPI
 from Account.authorization import GlobalAuth
-
 from Account.views import account_controller
-from Cosmetic.views import Product_Router, Address_Router, Order_Router
-api = NinjaAPI()
+from Cosmetic.Cosmetic_api.product_api import Product_Router
+from Cosmetic.Cosmetic_api.order_api import Order_Router
+api = NinjaAPI(
+    title=' Pure Beauty',
+    version='0.1',
+    description='Our products is Crulety-free,Vegan and Eco-friendly.',
+)
 
 api.add_router('auth', account_controller)
 api.add_router('Product', Product_Router)
-api.add_router('Address', Address_Router)
 api.add_router('Order', Order_Router, auth=GlobalAuth)
 
 urlpatterns = [
