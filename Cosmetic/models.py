@@ -19,11 +19,11 @@ class Product(models.Model):
     discounted_price = models.DecimalField('discounted price', max_digits=10, decimal_places=2,
                                            null=True,blank=True,default= 0)
     color = models.CharField('color',max_length = 80)
-    imageUrl = models.URLField('imageUrl',max_length=255)
+    imageUrl = models.URLField('imageUrl',max_length=255, null=True , blank=True)
     category = models.ForeignKey('Category', verbose_name='category', related_name='products',
                                  null=True,blank=True,
-                                 on_delete=models.CASCADE)
-    brand = models.ForeignKey('Brand',on_delete=models.CASCADE,related_name='products',
+                                 on_delete=models.SET_NULL)
+    brand = models.ForeignKey('Brand',on_delete=models.SET_NULL,related_name='products',
                                  null=True,blank=True)
     created = models.DateTimeField(editable=False, auto_now_add=True)
     updated = models.DateTimeField(editable=False, auto_now=True)
@@ -69,7 +69,11 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.user}-{self.total}'
 
-
+    @property
+    def order_total(self):
+        return sum(
+            (i.product.price * i.item_qty)-i.product.discounted_price for i in self.items.all()
+        )
 class Item(models.Model):
     user = models.ForeignKey(User, verbose_name='user', related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, verbose_name='product',related_name='items',

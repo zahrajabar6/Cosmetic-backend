@@ -1,4 +1,6 @@
 from decimal import Decimal
+from typing import List
+
 from ninja import Schema
 from django.contrib.auth import get_user_model
 
@@ -38,11 +40,25 @@ class ProductIn(Schema):
     description: str = None
     ingredient: str = None
     price: Decimal
-    discounted_price: Decimal
+    discounted_price: Decimal = None
     color: str
     imageUrl: str
-    category_id: int
-    brand_id: int
+    category_id: int = None
+    brand_id: int = None
+    is_active: bool
+
+
+class ProductUpdate(ProductIn):
+    id: int
+    name: str
+    description: str = None
+    ingredient: str = None
+    price: Decimal
+    discounted_price: Decimal = None
+    color: str
+    imageUrl: str
+    category_id: int = None
+    brand_id: int = None
     is_active: bool
 
 
@@ -52,12 +68,17 @@ class ProductOut(ProductIn):
     description: str = None
     ingredient: str = None
     price: Decimal
-    discounted_price: Decimal
+    discounted_price: Decimal = None
     color: str
     imageUrl: str
     brand: BrandOut = None
     category: CategoryOut = None
     is_active: bool
+
+
+class GeneralLedgerOut(Schema):
+    category: CategoryOut
+    products: List[ProductOut]
 
 
 class OrderIn(Schema):
