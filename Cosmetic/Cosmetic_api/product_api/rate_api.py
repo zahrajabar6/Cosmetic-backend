@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from Account.authorization import GlobalAuth
 from Cosmetic.models import *
 from Cosmetic.schemas import *
@@ -14,37 +16,31 @@ Rate_Router = Router(tags=['Rate'])
     200: RateOut,
     400: MessageOut}, auth=GlobalAuth())
 def rate(request, rate_in: RateIn):
-    review = Rate.objects.create(**rate_in.dict(), user=User.objects.get(id=request.auth['pk']))
-    return 200, review
+    user = User.objects.get(id=request.auth['pk'])
+    if rate_in.rate not in range(0, 6):
+        return 400, {'detail': 'Oh Sorry,the rating can be between 0 and 5 '}
+    try:
+        user_in_rate = user.rates.get(product_id=rate_in.product_id)
+        if user_in_rate:
+            user_in_rate.rate = rate_in.rate
+            user_in_rate.save()
+            return 200, {'detail': 'Rate is updated'}
+    except Rate.DoesNotExist:
+        review = Rate.objects.create(**rate_in.dict(), user=user)
+        return 200, {'detail': 'Rate in created'}
 
 
-@Rate_Router.post(f"/Product_rates", response={
-    200: List[RateOut],
-    404: MessageOut}, auth= None)
-def product_reviews(request, id: int):
-    products = Rate.objects.all().filter(product_id=id)
-    return 200, products
-
-
-'''
-    ___1___
-    if rate_in.rate > 5:
-        return 400 ,  {'detail': 'Oh Sorry,the rating can not be higher than 5 '}
-    review = get_object_or_404(Review,product_id = rate_in.product_id , user=User.objects.get(id=request.auth['pk']))
-    if not review :
-        review = Review.objects.create(**rate_in.dict(), user=User.objects.get(id=request.auth['pk']))
-        return 200, review
-    review.rate = rate_in.rate
-    review.save()
-    return 200 , review
-    ___2___
-    review = get_object_or_404(Review, product_id=rate_in.product_id, user=User.objects.get(id=request.auth['pk']))
-    reviews = Review.objects.filter(user=User.objects.get(id=request.auth['pk']))
-    if review in reviews:
-        review.rate = rate_in.rate
-        review.save()
-        print(review)
-        return 200, review
-    review = Review.objects.create(**rate_in.dict(), user=User.objects.get(id=request.auth['pk']))
-    return 200, review
-'''
+@Rate_Router.get(f"/Product_avg_rate", response={
+    200: RateOut
+}, auth=GlobalAuth())
+def get_avg_rate(request, product_id: int):
+    product = Product.objects.get(id=product_id)
+    rates = product.rates.all()
+    rating = rates.count()
+    for no_rate in rates:
+        no_rate.rate += no_rate.rate
+    avg_rate = no_rate.rate / rating
+    return 200, {
+        'product_id': product_id,
+        'rate': round(avg_rate, 2)
+    }

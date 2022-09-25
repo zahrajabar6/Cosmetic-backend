@@ -121,6 +121,15 @@ class RateIn(Schema):
 
 
 class RateOut(Schema):
-    user: AccountOut
     product_id: int
-    rate: int
+    rate: float
+
+
+class FavoriteIn(Schema):
+    product_id: int
+    is_favorite: bool
+
+
+class FavoriteOut(Schema):
+    user: AccountOut
+    product: ProductOut

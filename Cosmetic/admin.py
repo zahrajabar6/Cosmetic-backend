@@ -14,9 +14,9 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['user','product','item_qty','ordered']
+    list_display = ['user','product','item_qty','ordered','checked']
     search_fields = ['user', 'product']
-    list_filter = ['ordered']
+    list_filter = ['ordered','checked']
 
 
 @admin.register(Category)
@@ -27,9 +27,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['user','total','status','ordered']
+    list_display = ['user','total','status','checked']
     search_fields = ['user', 'product','status']
-    list_filter = ['ordered','status']
+    list_filter = ['checked','status']
 
 
 @admin.register(Rate)
@@ -43,3 +43,8 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ['first_name','last_name','email','is_staff','is_superuser','last_login']
     search_fields = ['first_name', 'last_name']
     list_filter = ['is_staff','is_superuser']
+
+@admin.register(Favorite)
+class favoriteAdmin(admin.ModelAdmin):
+    list_display = ['id','user', 'product']
+    search_fields = ['user', 'product']

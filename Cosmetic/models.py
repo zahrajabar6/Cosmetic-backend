@@ -28,9 +28,17 @@ class Product(models.Model):
     created = models.DateTimeField(editable=False, auto_now_add=True)
     updated = models.DateTimeField(editable=False, auto_now=True)
     is_active = models.BooleanField('is active')
-    is_favorite = models.BooleanField('is_favorite', null=True, blank=True)
     def __str__(self):
         return f'{self.name}-{self.category}-{self.color}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, verbose_name='user', related_name='favorites', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, verbose_name='product', related_name='favorites',
+                                on_delete=models.CASCADE)
+    def __str__(self):
+        return f'{self.user}-{self.product}'
+
 class Category(models.Model):
     parent = models.ForeignKey('self',verbose_name='parent',related_name='children',null=True,blank=True,
                                on_delete=models.CASCADE)
@@ -61,7 +69,7 @@ class Order(models.Model):
                              on_delete=models.CASCADE)
     total = models.DecimalField('total', blank=True, null=True, max_digits=1000, decimal_places=0)
     status = models.CharField('status', max_length=255, choices=OrderStatusChoices.choices)
-    ordered = models.BooleanField('ordered')
+    checked = models.BooleanField('ordered')
     created = models.DateTimeField(editable=False, auto_now_add=True)
     updated = models.DateTimeField(editable=False, auto_now=True)
     items = models.ManyToManyField('Item', verbose_name='items', related_name='orders')
@@ -72,7 +80,7 @@ class Order(models.Model):
     @property
     def order_total(self):
         return sum(
-            (i.product.price * i.item_qty)-i.product.discounted_price for i in self.items.all()
+            ((i.product.price * i.item_qty)+10)-i.product.discounted_price for i in self.items.all()
         )
 class Item(models.Model):
     user = models.ForeignKey(User, verbose_name='user', related_name='items', on_delete=models.CASCADE)
@@ -80,7 +88,7 @@ class Item(models.Model):
                                 on_delete=models.CASCADE)
     item_qty = models.IntegerField('item_qty')
     ordered = models.BooleanField('ordered', default=False)
-
+    checked = models.BooleanField('checked',default=False)
     def __str__(self):
         return f'{self.user}-{self.product}-{self.item_qty}'
 

@@ -40,10 +40,10 @@ def all_products(request, *,
         products = products.filter(price__lte=price_to)
 
     if ascending:
-        products = products.order_by('-price')
+        products = products.order_by('price')
 
     if descending:
-        products = products.order_by('price')
+        products = products.order_by('-price')
     if abc:
         products = products.order_by('name')
 
@@ -65,40 +65,45 @@ def product(request, product_id: int):
 
 
 @Product_Router.get(f"/list_favorite", response={
-    200: List[ProductOut],
+    200: List[FavoriteOut],
     404: MessageOut
-})
+}, auth=GlobalAuth())
 def list_favorite(request):
-    products = Product.objects.filter(is_favorite=True).filter(is_active=True).select_related('category', 'brand')
-    if not products:
-        return 404, {'detail': 'No Products found'}
-    return products
+    user = User.objects.get(id=request.auth['pk'])
+    favorites = Favorite.objects.filter(user=user)
+    if not favorites:
+        return 404, {'detail': 'No favorites found'}
+    return favorites
 
 
-@Product_Router.put(f"/set_favorite", response={
+@Product_Router.post(f"/add_favorite", response={
     200: MessageOut,
-    404: MessageOut
-})
-def set_favorite(request, id: int):
-    product = get_object_or_404(Product, id=id)
-    if not product:
-        return 404, {'detail': f'Product with id {id} does not exist'}
-    product.is_favorite = True
-    product.save()
-    return 200, {'detail': f'Product with id {id} set to favorite'}
+    400: MessageOut
+
+}, auth=GlobalAuth())
+def add_favorite(request, product_id: int):
+    user = User.objects.get(id=request.auth['pk'])
+    fa = user.favorites.all().filter(product_id=product_id)
+    if fa:
+        return 400, {'detail': f'Product with id {product_id} was in favorite'}
+
+    favorite_in = Favorite.objects.create(product_id=product_id, user=user)
+    favorite_in.save()
+    return 200, {'detail': f'Product with id {product_id} add to favorite'}
 
 
 @Product_Router.put(f"/Remove_favorite", response={
     200: MessageOut,
     404: MessageOut
-})
-def remove_favorite(request, id: int):
-    product = get_object_or_404(Product, id=id)
-    if not product:
-        return 404, {'detail': f'Product with id {id} does not exist'}
-    product.is_favorite = False
-    product.save()
-    return 200, {'detail': f'Product with id {id} remove from favorite'}
+}, auth=GlobalAuth())
+def remove_favorite(request, product_id: int):
+    user = User.objects.get(id=request.auth['pk'])
+    fa = user.favorites.all().filter(product_id=product_id)
+    if fa:
+        fa = get_object_or_404(Favorite, product_id=product_id, user=user)
+        fa.delete()
+        return 200, {'detail': f'Product with id {product_id} remove from favorite'}
+    return 404, {'detail': f'Product with id {product_id} was not in favorite'}
 
 # @Product_Router.get(f"/list_category", response={
 #     200: List[CategoryOut],
