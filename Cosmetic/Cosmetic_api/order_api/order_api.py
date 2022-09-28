@@ -92,31 +92,38 @@ def delete_item(request, item_id: int):
 
 
 @Order_Router.post("create_order", response={
-    200: MessageOut,
-    404: MessageOut
+    200: OrderOut,
+    404: OrderOut
 }, auth=GlobalAuth())
 def create_order(request):
     user = User.objects.get(id=request.auth['pk'])
     user_items = user.items.filter(checked=False)
     if not user_items:
-        return 404, {'detail': 'No Items Found To added to Order'}
+        return 404, {'user':user,
+            'discounted_total': 0.00,
+            'sub_total': 0.00,
+            'total': 0.00,
+            }
     try:
         order = user.orders.prefetch_related('items').get(checked=False)
         if order:
             order.items.set(user_items)
-            order.total = order.order_total
+            order.discounted_total = order.order_total_discounted
+            order.sub_total = order.order_sub_total
+            order.total = ((order.sub_total + 10) - order.discounted_total)
             order.items.update(ordered=True)
             order.save()
-            return 200, {'detail': 'Order Updated Successfully!'}
+            return 200, order
     except Order.DoesNotExist:
         order = Order.objects.create(user=user, status='NEW',
                                      checked=False)
         order.items.set(user_items)
-        order.total = order.order_total
+        order.discounted_total = order.order_total_discounted
+        order.sub_total = order.order_sub_total
+        order.total = ((order.sub_total + 10) - order.discounted_total)
         user_items.update(ordered=True)
         order.save()
-        return {'detail': 'Order Created Successfully!'}
-
+        return 200, order
 
 @Order_Router.post('checkout', response={
     200: MessageOut,

@@ -92,7 +92,7 @@ def add_favorite(request, product_id: int):
     return 200, {'detail': f'Product with id {product_id} add to favorite'}
 
 
-@Product_Router.put(f"/Remove_favorite", response={
+@Product_Router.delete(f"/Remove_favorite", response={
     200: MessageOut,
     404: MessageOut
 }, auth=GlobalAuth())
@@ -105,40 +105,15 @@ def remove_favorite(request, product_id: int):
         return 200, {'detail': f'Product with id {product_id} remove from favorite'}
     return 404, {'detail': f'Product with id {product_id} was not in favorite'}
 
-# @Product_Router.get(f"/list_category", response={
-#     200: List[CategoryOut],
-#     404: MessageOut
-# })
-# def categories(request):
-#     categories = Category.objects.filter(is_active=True)
-#     if not categories:
-#         return 404, {'detail': f'categories not exist'}
-#     return categories
+@Product_Router.get("is_favorites", response={
+    200: IsFavorite,
+    400: IsFavorite
+}, auth=GlobalAuth())
+def is_favorites(request, product_id: int):
+    try:
+        product = Favorite.objects.get(product_id=product_id, user=User.objects.get(id=request.auth['pk']))
+        if product:
+            return 200, {'is_favorite': 'true'}
+    except Favorite.DoesNotExist:
+        return 200, {'is_favorite': 'false'}
 
-
-# @Product_Router.get("/list-categories", response={
-#     200: List[ProductOut],
-#     404: MessageOut
-# })
-# def all_categories(request, *,
-#                    ascending: str = None,
-#                    descending: str = None,
-#                    abc: str = None,
-#                    cba: str = None,
-#                    ):
-#     products = Product.objects.filter(is_active=True).order_by('category').select_related('brand')
-#     if not products:
-#         return 404, {'detail': 'No Products found'}
-#     if ascending:
-#         products = products.order_by('-price')
-#
-#     if descending:
-#         products = products.order_by('price')
-#
-#     if abc:
-#         products = products.order_by('name')
-#
-#     if cba:
-#         products = products.order_by('-name')
-#
-#     return products

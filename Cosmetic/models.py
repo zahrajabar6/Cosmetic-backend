@@ -67,21 +67,30 @@ class Brand(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(User, verbose_name='user', related_name='orders', null=True, blank=True,
                              on_delete=models.CASCADE)
-    total = models.DecimalField('total', blank=True, null=True, max_digits=1000, decimal_places=0)
+    discounted_total = models.DecimalField('discounted', blank=True, null=True, max_digits=1000, decimal_places=2)
+    sub_total = models.DecimalField('sub_total', blank=True, null=True, max_digits=1000, decimal_places=2)
+    total = models.DecimalField('total', blank=True, null=True, max_digits=1000, decimal_places=2)
     status = models.CharField('status', max_length=255, choices=OrderStatusChoices.choices)
     checked = models.BooleanField('ordered')
     created = models.DateTimeField(editable=False, auto_now_add=True)
     updated = models.DateTimeField(editable=False, auto_now=True)
     items = models.ManyToManyField('Item', verbose_name='items', related_name='orders')
 
-    def __str__(self):
+    def str(self):
         return f'{self.user}-{self.total}'
 
     @property
-    def order_total(self):
+    def order_sub_total(self):
         return sum(
-            ((i.product.price * i.item_qty)+10)-i.product.discounted_price for i in self.items.all()
+            i.product.price * i.item_qty for i in self.items.all()
         )
+
+    @property
+    def order_total_discounted(self):
+        return sum(
+            i.product.discounted_price for i in self.items.all()
+        )
+
 class Item(models.Model):
     user = models.ForeignKey(User, verbose_name='user', related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, verbose_name='product',related_name='items',

@@ -1,3 +1,4 @@
+from Cosmetic.Cosmetic_api.product_api.services.get_avd import avg_rate
 from django.shortcuts import get_object_or_404
 
 from Account.authorization import GlobalAuth
@@ -13,7 +14,7 @@ Rate_Router = Router(tags=['Rate'])
 
 
 @Rate_Router.post("/Set_rate", response={
-    200: RateOut,
+    200: MessageOut,
     400: MessageOut}, auth=GlobalAuth())
 def rate(request, rate_in: RateIn):
     user = User.objects.get(id=request.auth['pk'])
@@ -29,18 +30,20 @@ def rate(request, rate_in: RateIn):
         review = Rate.objects.create(**rate_in.dict(), user=user)
         return 200, {'detail': 'Rate in created'}
 
-
 @Rate_Router.get(f"/Product_avg_rate", response={
-    200: RateOut
+    200: RateOut,
+    404: MessageOut
 }, auth=GlobalAuth())
 def get_avg_rate(request, product_id: int):
-    product = Product.objects.get(id=product_id)
-    rates = product.rates.all()
-    rating = rates.count()
-    for no_rate in rates:
-        no_rate.rate += no_rate.rate
-    avg_rate = no_rate.rate / rating
+    rates = Rate.objects.filter(product_id = product_id)
+    print(rates)
+    if rates:
+        rate = avg_rate(rates)
+        return 200, {
+            'product_id': product_id,
+            'rate': rate
+                    }
     return 200, {
-        'product_id': product_id,
-        'rate': round(avg_rate, 2)
-    }
+            'product_id': product_id,
+            'rate': 0.0
+                    }

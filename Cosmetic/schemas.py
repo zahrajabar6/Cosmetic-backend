@@ -91,8 +91,9 @@ class OrderIn(Schema):
 
 class OrderOut(Schema):
     user: AccountOut
+    discounted_total: Decimal
+    sub_total: Decimal
     total: Decimal
-    item: str
 
 
 class ItemIn(Schema):
@@ -133,3 +134,6 @@ class FavoriteIn(Schema):
 class FavoriteOut(Schema):
     user: AccountOut
     product: ProductOut
+
+class IsFavorite(Schema):
+    is_favorite: str
